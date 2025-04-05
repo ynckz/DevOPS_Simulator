@@ -4,16 +4,14 @@ import random
 import time
 from datetime import datetime
 from typing import List, Tuple, Optional, Dict, Any
-
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, func, Float
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship, Session
-
+from sqlalchemy.orm import sessionmaker, relationship, Session, declarative_base
 from config import BOT_TOKEN
 from models.database import Base, engine
 from services.incident_service import init_default_incidents
+from services.crisis_service import init_default_crises
 from handlers import setup_routers
 
 # Настройка логирования
@@ -69,6 +67,7 @@ async def init_db():
     """Инициализация базы данных и заполнение начальными данными"""
     Base.metadata.create_all(engine)
     await init_default_incidents()
+    await init_default_crises()
 
 # Получение или создание игрока
 async def get_or_create_player(user_id: int, username: str) -> Player:

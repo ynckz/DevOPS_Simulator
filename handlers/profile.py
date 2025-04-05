@@ -1,13 +1,14 @@
 from aiogram import Router
 from aiogram.types import Message
-from aiogram.filters import Text
+from aiogram import F
+from aiogram.filters import Command
 
 from services import get_player_profile
 
 # Создаем роутер для профиля
 profile_router = Router()
 
-@profile_router.message(Text(text='🖥 Профиль'))
+@profile_router.message(F.text == '🖥 Профиль')
 async def show_profile(message: Message):
     user_id = message.from_user.id
     player, skills = await get_player_profile(user_id)

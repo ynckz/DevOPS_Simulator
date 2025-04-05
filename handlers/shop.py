@@ -1,14 +1,13 @@
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
-from aiogram.filters import Text
-
 from services import get_player_profile, buy_server, upgrade_skill
 from utils.keyboards import get_shop_keyboard, get_skills_keyboard
+from services.daily_service import update_task_progress
 
 # Создаем роутер для магазина
 shop_router = Router()
 
-@shop_router.message(Text(text='🛒 Магазин'))
+@shop_router.message(F.text == '🛒 Магазин')
 async def show_shop(message: Message):
     user_id = message.from_user.id
     player, _ = await get_player_profile(user_id)
@@ -55,7 +54,7 @@ async def handle_buy_server(call: CallbackQuery):
     else:
         await call.answer(f"Недостаточно средств! Необходимо ${cost}")
 
-@shop_router.message(Text(text='📊 Навыки'))
+@shop_router.message(F.text == '📊 Навыки')
 async def show_skills(message: Message):
     user_id = message.from_user.id
     player, skills = await get_player_profile(user_id)
@@ -79,6 +78,9 @@ async def handle_skill_upgrade(call: CallbackQuery):
     success, new_level, cost = await upgrade_skill(user_id, skill_name)
     
     if success:
+        # Обновляем прогресс ежедневного задания
+        await update_task_progress(user_id, "upgrade_skill")
+        
         await call.answer(f"Навык {skill_name} улучшен до уровня {new_level}!")
         
         # Обновляем меню навыков
