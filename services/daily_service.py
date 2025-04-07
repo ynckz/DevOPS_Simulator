@@ -122,7 +122,7 @@ async def claim_task_reward(user_id: int, task_id: int) -> tuple:
         
         return True, task.reward_money, task.reward_exp
 
-async def get_daily_tasks(user_id: int) -> List[DailyTask]:
+async def get_daily_tasks(user_id: int) -> List[dict]:
     """Получение ежедневных заданий для игрока"""
     with SessionMaker() as session:
         # Проверяем, есть ли задания на сегодня
@@ -135,11 +135,15 @@ async def get_daily_tasks(user_id: int) -> List[DailyTask]:
         # Если нет заданий на сегодня, создаем новые
         if not tasks:
             tasks = await generate_daily_tasks(user_id)
-            
-        # Важно: делаем копию данных, пока сессия активна
-        tasks_data = []
-        for task in tasks:
-            tasks_data.append({
+            # Получаем новые задания из базы
+            tasks = session.query(DailyTask).filter(
+                DailyTask.user_id == user_id,
+                DailyTask.date_created == today
+            ).all()
+        
+        # Копируем данные до закрытия сессии
+        return [
+            {
                 'id': task.id,
                 'description': task.description,
                 'current_amount': task.current_amount,
@@ -147,7 +151,7 @@ async def get_daily_tasks(user_id: int) -> List[DailyTask]:
                 'reward_money': task.reward_money,
                 'reward_exp': task.reward_exp,
                 'completed': task.completed,
-                'claimed': task.claimed
-            })
-        
-        return tasks_data 
+                'claimed': getattr(task, 'claimed', False)
+            }
+            for task in tasks
+        ] 
