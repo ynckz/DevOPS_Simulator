@@ -73,16 +73,16 @@ def get_incident_solutions_keyboard(incident) -> InlineKeyboardMarkup:
     markup = InlineKeyboardMarkup(inline_keyboard=keyboard)
     return markup
 
-def get_daily_tasks_keyboard(tasks) -> InlineKeyboardMarkup:
+def get_daily_tasks_keyboard(tasks_data: List[dict]) -> InlineKeyboardMarkup:
     """Создать клавиатуру для заданий"""
     keyboard = []
     
-    for task in tasks:
-        if task.completed and not task.claimed:
+    for task in tasks_data:
+        if task['completed'] and not task.get('claimed', False):
             keyboard.append([
                 InlineKeyboardButton(
-                    text=f"Получить награду за '{task.description}'", 
-                    callback_data=f"claim_task_{task.id}"
+                    text=f"Получить награду за '{task['description']}'", 
+                    callback_data=f"claim_task_{task['id']}"
                 )
             ])
     

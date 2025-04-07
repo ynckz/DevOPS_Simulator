@@ -9,7 +9,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, func, Float
 from sqlalchemy.orm import sessionmaker, relationship, Session, declarative_base
 from config import BOT_TOKEN
-from models.database import Base, engine
+from models.database import Base, engine, init_database
 from services.incident_service import init_default_incidents
 from services.crisis_service import init_default_crises
 from handlers import setup_routers
@@ -65,7 +65,7 @@ class Incident(Base):
 # Инициализация базы данных
 async def init_db():
     """Инициализация базы данных и заполнение начальными данными"""
-    Base.metadata.create_all(engine)
+    init_database()  # Пересоздаем все таблицы
     await init_default_incidents()
     await init_default_crises()
 

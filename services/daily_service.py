@@ -135,5 +135,19 @@ async def get_daily_tasks(user_id: int) -> List[DailyTask]:
         # Если нет заданий на сегодня, создаем новые
         if not tasks:
             tasks = await generate_daily_tasks(user_id)
+            
+        # Важно: делаем копию данных, пока сессия активна
+        tasks_data = []
+        for task in tasks:
+            tasks_data.append({
+                'id': task.id,
+                'description': task.description,
+                'current_amount': task.current_amount,
+                'target_amount': task.target_amount,
+                'reward_money': task.reward_money,
+                'reward_exp': task.reward_exp,
+                'completed': task.completed,
+                'claimed': task.claimed
+            })
         
-        return tasks 
+        return tasks_data 
